@@ -2,8 +2,9 @@
 
 import CategoryBubbles from '@/components/CategoryBubbles';
 import ContentDisplay from '@/components/ContentDisplay';
+import DefaultContent from '@/components/DefaultContent';
 import { healthCategories } from '@/data/categories';
-import { hasReachedLimit, incrementRequestCount } from '@/lib/cookies';
+import { hasReachedLimit, incrementRequestCount, MAX_REQUESTS } from '@/lib/cookies';
 import { fadeIn } from '@/styles/animations';
 import { GeneratedContent, HealthCategory } from '@/types/health';
 import { motion } from 'framer-motion';
@@ -77,7 +78,7 @@ export default function HomePage() {
           icon: '✨',
         });
       } else {
-        toast.warning('Bu son içerik oluşturma hakkınızdı. Yarın tekrar bekleriz!', {
+        toast('Bu son içerik oluşturma hakkınızdı. Yarın tekrar bekleriz!', {
           duration: 5000,
           position: 'top-center',
           icon: '⏳',
@@ -85,11 +86,8 @@ export default function HomePage() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Bir hata oluştu');
-      toast.error('İçerik oluşturulurken bir hata oluştu', {
-        duration: 3000,
-        position: 'top-center',
-        icon: '❌',
-      });
+      // Hata durumunda direkt DefaultContent'i göster
+      setGeneratedContent(null);
     } finally {
       setIsLoading(false);
     }
@@ -180,12 +178,9 @@ export default function HomePage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
                 </div>
               ) : error ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-red-50 text-red-500 p-4 rounded-lg text-center"
-                >
-                  {error}
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+                  <div className="bg-red-50 text-red-500 p-4 rounded-lg text-center">{error}</div>
+                  <DefaultContent category={selectedCategory?.title || ''} />
                 </motion.div>
               ) : generatedContent ? (
                 <ContentDisplay
