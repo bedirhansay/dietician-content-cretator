@@ -8,6 +8,7 @@ import { GeneratedContent, HealthCategory } from '@/types/health';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 
 export default function SocialContentPage() {
   const router = useRouter();
@@ -15,8 +16,28 @@ export default function SocialContentPage() {
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCategorySelect = (category: HealthCategory) => {
+  const handleCategorySelect = async (category: HealthCategory) => {
     setSelectedCategory(category);
+    setIsLoading(true);
+
+    try {
+      const contentResponse = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: category.title }),
+      });
+
+      if (!contentResponse.ok) throw new Error('İçerik oluşturulamadı');
+      const generatedContent = await contentResponse.json();
+
+      setGeneratedContent(generatedContent);
+    } catch (error) {
+      console.error('Content generation error:', error);
+      toast.error('İçerik oluşturulurken bir hata oluştu');
+      setGeneratedContent(null);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -34,7 +55,15 @@ export default function SocialContentPage() {
           {!selectedCategory ? (
             <CategorySelector categories={healthCategories} onSelect={handleCategorySelect} />
           ) : (
-            <ContentDisplay category={selectedCategory} />
+            <>
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+                </div>
+              ) : (
+                <ContentDisplay category={selectedCategory} generatedContent={generatedContent} />
+              )}
+            </>
           )}
         </motion.section>
       </div>

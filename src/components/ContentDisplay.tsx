@@ -1,6 +1,6 @@
 'use client';
 
-import { HealthCategory } from '@/types/health';
+import { GeneratedContent, HealthCategory } from '@/types/health';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { FC } from 'react';
@@ -9,11 +9,12 @@ import { FaCopy, FaShare } from 'react-icons/fa';
 
 interface ContentDisplayProps {
   category: HealthCategory;
+  generatedContent: GeneratedContent | null;
 }
 
-const ContentDisplay: FC<ContentDisplayProps> = ({ category }) => {
-  // Kategori bazlı örnek içerik
-  const defaultContent = {
+const ContentDisplay: FC<ContentDisplayProps> = ({ category, generatedContent }) => {
+  // Eğer generatedContent varsa onu kullan, yoksa varsayılan içeriği göster
+  const content = generatedContent || {
     title: `${category.emoji} ${category.title} İçin Öneriler`,
     content: `✨ ${category.title} hakkında bilmeniz gerekenler:
 
@@ -37,7 +38,7 @@ ${getDailyAdvice(category.id)}
   };
 
   const handleCopyContent = () => {
-    navigator.clipboard.writeText(defaultContent.content);
+    navigator.clipboard.writeText(content.content);
     toast.success('İçerik kopyalandı!', {
       icon: '📋',
       duration: 2000,
@@ -47,8 +48,8 @@ ${getDailyAdvice(category.id)}
   const handleShare = async () => {
     try {
       await navigator.share({
-        title: defaultContent.title,
-        text: defaultContent.content,
+        title: content.title,
+        text: content.content,
         url: window.location.href,
       });
     } catch (err) {
@@ -66,9 +67,9 @@ ${getDailyAdvice(category.id)}
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sol taraf - İçerik */}
           <div className="flex-1 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">{defaultContent.title}</h2>
+            <h2 className="text-2xl font-bold text-gray-800">{content.title}</h2>
             <div className="prose prose-lg">
-              <div className="whitespace-pre-wrap text-gray-600">{defaultContent.content}</div>
+              <div className="whitespace-pre-wrap text-gray-600">{content.content}</div>
             </div>
             <div className="flex gap-4 pt-6">
               <motion.button
@@ -96,7 +97,7 @@ ${getDailyAdvice(category.id)}
           <div className="w-full md:w-1/3">
             <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 shadow-md">
               <Image
-                src={defaultContent.imageUrl}
+                src={content.imageUrl}
                 alt={category.title}
                 width={400}
                 height={400}

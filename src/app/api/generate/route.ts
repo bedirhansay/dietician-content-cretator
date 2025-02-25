@@ -1,10 +1,10 @@
-import { generateContent } from '@/lib/openai';
+import { generateContent } from '@/lib/deepseek';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
     const { category } = await request.json();
-    const content = await generateContent({ category });
+    const content = await generateContent(category);
 
     return NextResponse.json({ content });
   } catch (error) {

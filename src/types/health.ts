@@ -6,6 +6,7 @@ export interface HealthCategory {
 }
 
 export interface GeneratedContent {
+  title: string;
   content: string;
   imageUrl: string;
 }
